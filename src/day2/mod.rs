@@ -74,4 +74,11 @@ impl PasswordRequirement {
 
         count_of_letters >= self.min && count_of_letters <= self.max
     }
+
+    pub fn is_valid_part2(&self) -> bool {
+        let has_first = self.password.as_str()[self.min - 1..self.min] == self.letter;
+        let has_second = self.password.as_str()[self.max - 1..self.max] == self.letter;
+
+        has_first ^ has_second
+    }
 }

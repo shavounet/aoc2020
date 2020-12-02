@@ -22,11 +22,16 @@ fn main() -> Result<(), String> {
 
     println!("\n# Day 2");
     let day2_data: Vec<PasswordRequirement> = utils::load_data("src/day2/data.txt")?;
-    let day2_valid_count = day2_data.into_iter()
+    let day2_valid_count_part1 = (&day2_data).into_iter()
         .filter(|item| item.is_valid())
-        .collect::<Vec<PasswordRequirement>>()
+        .collect::<Vec<&PasswordRequirement>>()
         .len();
-    println!(" - There is {} valid passwords", day2_valid_count);
+    println!(" - There is {} valid passwords, for part 1", day2_valid_count_part1);
+    let day2_valid_count_part2 = (&day2_data).into_iter()
+        .filter(|item| item.is_valid_part2())
+        .collect::<Vec<&PasswordRequirement>>()
+        .len();
+    println!(" - There is {} valid passwords, for part 2", day2_valid_count_part2);
 
     Ok(())
 }
