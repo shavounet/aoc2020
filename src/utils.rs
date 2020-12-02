@@ -1,6 +1,8 @@
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Error;
+use std::str::FromStr;
+use std::fmt::Debug;
 
 pub struct LoaderError {
     message: String
@@ -20,7 +22,9 @@ impl From<LoaderError> for String {
     }
 }
 
-pub fn load_data(file_name: &str) -> Result<Vec<usize>, LoaderError> {
+pub fn load_data<T: FromStr>(file_name: &str) -> Result<Vec<T>, LoaderError>
+    where T::Err: Debug
+{
     let mut file = File::open(file_name)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
