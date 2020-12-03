@@ -1,4 +1,5 @@
 use crate::utils::GenericError;
+use crate::day3::{RowSpec, Path};
 
 mod day1;
 mod day2;
@@ -35,7 +36,19 @@ fn main() -> Result<(), GenericError> {
     println!(" - There is {} valid passwords, for part 2", day2_valid_count_part2);
 
     println!("\n# Day 3");
-    let day3_data: day3::Map = utils::load_data("src/day2/data.txt")?.into();
-    println!("{:?}", day3_data);
+    let day3_data: day3::Map = utils::load_data("src/day3/data.txt")?.into();
+    let day3_path = Path::new(3, 1, day3_data.len() - 1);
+    let mut day3_count = 0;
+    for point in day3_path {
+        if day3_data.has_tree(point.0, point.1) {
+            day3_count += 1;
+        }
+    }
+    println!(" - There is {} trees", day3_count);
+    let day3_count2 = vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)].into_iter()
+        .map(|(dx, dy)| Path::new(dx, dy, day3_data.len() - 1))
+        .map(|path| path.filter(|&(x, y)| day3_data.has_tree(x, y)).collect::<Vec<(usize, usize)>>().len())
+        .fold(1, |acc, cur| acc * cur);
+    println!(" - Final count is {}", day3_count2);
     Ok(())
 }
