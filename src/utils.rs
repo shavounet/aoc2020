@@ -1,39 +1,88 @@
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::Error;
 use std::str::FromStr;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display, Formatter};
+use std::error::Error;
+use std::num::ParseIntError;
 
-pub struct LoaderError {
-    message: String
-}
 
-impl From<Error> for LoaderError {
-    fn from(err: Error) -> Self {
-        LoaderError {
-            message: err.to_string()
-        }
-    }
-}
-
-impl From<LoaderError> for String {
-    fn from(err: LoaderError) -> Self {
-        err.message
-    }
-}
-
-pub fn load_data<T: FromStr>(file_name: &str) -> Result<Vec<T>, LoaderError>
-    where T::Err: Debug
+pub fn load_data<T: FromStr>(file_name: &str) -> Result<Vec<T>, LoadError>
+    where T::Err: Error
 {
     let mut file = File::open(file_name)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
     let result = contents.lines().into_iter()
-        .map(|item| item.parse())
+        .map(|item| item.parse::<T>())
         .filter(|item| item.is_ok())
-        .map(|item| item.unwrap())
-        .collect();
+        .collect::<Result<Vec<T>, T::Err>>()?;
 
     Ok(result)
+}
+
+#[derive(Debug)]
+pub struct GenericError {
+    message: String
+}
+
+impl GenericError {
+    pub fn new(message: String) -> Self {
+        GenericError { message }
+    }
+}
+
+impl From<LoadError> for GenericError
+{
+    fn from(err: LoadError) -> Self {
+        GenericError {
+            message: err.to_string()
+        }
+    }
+}
+
+impl From<ParseIntError> for GenericError
+{
+    fn from(err: ParseIntError) -> Self {
+        GenericError {
+            message: err.to_string()
+        }
+    }
+}
+
+impl From<std::io::Error> for GenericError
+{
+    fn from(err: std::io::Error) -> Self {
+        GenericError {
+            message: err.to_string()
+        }
+    }
+}
+
+impl Display for GenericError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl Error for GenericError {}
+
+pub struct LoadError {
+    message: String
+}
+
+impl<T> From<T> for LoadError
+    where T: Error
+{
+    fn from(err: T) -> Self {
+        LoadError {
+            message: err.to_string()
+        }
+    }
+}
+
+impl ToString for LoadError {
+    fn to_string(&self) -> String {
+        self.message.clone()
+    }
 }

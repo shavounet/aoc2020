@@ -1,10 +1,11 @@
-use crate::day2::PasswordRequirement;
+use crate::utils::GenericError;
 
 mod day1;
 mod day2;
+mod day3;
 mod utils;
 
-fn main() -> Result<(), String> {
+fn main() -> Result<(), GenericError> {
     println!("Hello, AOC 2020 !");
     println!("=================");
 
@@ -21,17 +22,20 @@ fn main() -> Result<(), String> {
     }
 
     println!("\n# Day 2");
-    let day2_data: Vec<PasswordRequirement> = utils::load_data("src/day2/data.txt")?;
+    let day2_data: Vec<day2::PasswordRequirement> = utils::load_data("src/day2/data.txt")?;
     let day2_valid_count_part1 = (&day2_data).into_iter()
         .filter(|item| item.is_valid())
-        .collect::<Vec<&PasswordRequirement>>()
+        .collect::<Vec<&day2::PasswordRequirement>>()
         .len();
     println!(" - There is {} valid passwords, for part 1", day2_valid_count_part1);
     let day2_valid_count_part2 = (&day2_data).into_iter()
         .filter(|item| item.is_valid_part2())
-        .collect::<Vec<&PasswordRequirement>>()
+        .collect::<Vec<&day2::PasswordRequirement>>()
         .len();
     println!(" - There is {} valid passwords, for part 2", day2_valid_count_part2);
 
+    println!("\n# Day 3");
+    let day3_data: day3::Map = utils::load_data("src/day2/data.txt")?.into();
+    println!("{:?}", day3_data);
     Ok(())
 }

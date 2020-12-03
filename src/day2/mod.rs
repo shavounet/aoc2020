@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use std::num::ParseIntError;
+use crate::utils::GenericError;
 
 #[derive(Debug)]
 pub struct PasswordRequirement {
@@ -9,52 +9,31 @@ pub struct PasswordRequirement {
     password: String,
 }
 
-#[derive(Debug)]
-pub struct PasswordRequirementError {
-    message: String
-}
-
-impl From<ParseIntError> for PasswordRequirementError {
-    fn from(err: ParseIntError) -> Self {
-        PasswordRequirementError {
-            message: err.to_string()
-        }
-    }
-}
-
 impl FromStr for PasswordRequirement {
-    type Err = PasswordRequirementError;
+    type Err = GenericError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let spec = String::from(s);
 
         let spec_parts: Vec<&str> = spec.split(":").collect();
         if spec_parts.len() < 2 {
-            return Err(PasswordRequirementError {
-                message: "Not enough spec parts".to_string()
-            });
+            return Err(GenericError::new("Not enough spec parts".to_string()));
         }
 
         let requirement_parts: Vec<&str> = spec_parts[0].split_whitespace().collect();
         if requirement_parts.len() < 2 {
-            return Err(PasswordRequirementError {
-                message: "Not enough requirement parts".to_string()
-            });
+            return Err(GenericError::new("Not enough requirement parts".to_string()));
         }
 
         let min_max_parts: Vec<&str> = requirement_parts[0].split("-").collect();
         if min_max_parts.len() < 2 {
-            return Err(PasswordRequirementError {
-                message: "Not enough minmax parts".to_string()
-            });
+            return Err(GenericError::new("Not enough minmax parts".to_string()));
         }
 
         let letter = requirement_parts[1].trim().to_string();
         if letter.len() != 1 {
-            return Err(PasswordRequirementError {
-                message: "Letter length is not correct".to_string()
-            });
-        }
+            return Err(GenericError::new("Letter length is not correct".to_string()));
+        };
 
         Ok(PasswordRequirement {
             letter,
