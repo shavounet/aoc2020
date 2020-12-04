@@ -28,7 +28,7 @@ impl IntoIterator for Map {
 
 impl Map {
     pub fn has_tree(&self, x: usize, y: usize) -> bool {
-        if y >= self.rows.len() || y < 0 {
+        if y >= self.rows.len() {
             return false;
         }
 

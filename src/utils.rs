@@ -6,14 +6,14 @@ use std::error::Error;
 use std::num::ParseIntError;
 
 
-pub fn load_data<T: FromStr>(file_name: &str) -> Result<Vec<T>, LoadError>
+pub fn load_data<T: FromStr>(file_name: &str, split_pattern : &str) -> Result<Vec<T>, LoadError>
     where T::Err: Error
 {
     let mut file = File::open(file_name)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
-    let result = contents.lines().into_iter()
+    let result = contents.split(split_pattern).into_iter()
         .map(|item| item.parse::<T>())
         .filter(|item| item.is_ok())
         .collect::<Result<Vec<T>, T::Err>>()?;
