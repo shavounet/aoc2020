@@ -1,9 +1,12 @@
 use crate::utils::GenericError;
+use std::rc::Rc;
+
+mod utils;
 
 mod day1;
 mod day2;
 mod day3;
-mod utils;
+mod day4;
 
 fn main() -> Result<(), GenericError> {
     println!("Hello, AOC 2020 !");
@@ -49,5 +52,27 @@ fn main() -> Result<(), GenericError> {
         .map(|path| path.filter(|&(x, y)| day3_data.has_tree(x, y)).collect::<Vec<(usize, usize)>>().len())
         .fold(1, |acc, cur| acc * cur);
     println!(" - Final count is {}", day3_count2);
+
+    println!("\n# Day 4");
+    let day4_regex_config = Rc::new(day4::RegexConfigs::default());
+    let day4_data: Vec<day4::PassportBuilder> = utils::load_data("src/day4/data.txt", "\n\n")?
+        .into_iter()
+        .map(|pass_builder: day4::PassportBuilder| pass_builder.set_regex_config(day4_regex_config.clone()))
+        .collect::<Vec<day4::PassportBuilder>>();
+    let day4_valid_count = (&day4_data).into_iter()
+        .filter(|pass_builder| pass_builder.is_valid())
+        .collect::<Vec<&day4::PassportBuilder>>()
+        .len();
+    println!(" - There is {} valid passports", day4_valid_count);
+    let day4_fields_valid_count = (&day4_data).into_iter()
+        .filter_map(|pass_builder|
+            match pass_builder.is_fields_valid() {
+                Ok(true) => Some(pass_builder),
+                _ => None,
+            }
+        )
+        .collect::<Vec<&day4::PassportBuilder>>()
+        .len();
+    println!(" - There is {} fully valid passports", day4_fields_valid_count);
     Ok(())
 }
