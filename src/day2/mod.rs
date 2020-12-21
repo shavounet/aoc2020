@@ -1,5 +1,6 @@
 use std::str::FromStr;
 use crate::utils::GenericError;
+use crate::daily_challenge::DailyChallenge;
 
 #[derive(Debug)]
 pub struct PasswordRequirement {
@@ -59,5 +60,31 @@ impl PasswordRequirement {
         let has_second = self.password.as_str()[self.max - 1..self.max] == self.letter;
 
         has_first ^ has_second
+    }
+}
+
+#[derive(Default)]
+pub struct Day2 {}
+
+impl DailyChallenge for Day2 {
+    type Data = PasswordRequirement;
+    type Wrapper = Vec<PasswordRequirement>;
+
+    fn get_day_num(&self) -> usize { 2 }
+
+    fn solve_part_1(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let count = data.into_iter()
+            .filter(|item| item.is_valid())
+            .collect::<Vec<&PasswordRequirement>>()
+            .len();
+        Ok(format!("{} valid passwords", count))
+    }
+
+    fn solve_part_2(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let count = data.into_iter()
+            .filter(|item| item.is_valid_part2())
+            .collect::<Vec<&PasswordRequirement>>()
+            .len();
+        Ok(format!("{} valid passwords", count))
     }
 }
