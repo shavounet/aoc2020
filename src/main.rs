@@ -1,5 +1,4 @@
 use crate::utils::GenericError;
-use std::rc::Rc;
 use daily_challenge::DailyChallenge;
 
 mod utils;
@@ -11,6 +10,7 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
+mod day7;
 
 fn main() -> Result<(), GenericError> {
     println!("Hello, AOC 2020 !");

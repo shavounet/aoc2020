@@ -50,6 +50,18 @@ impl From<ParseIntError> for GenericError
     }
 }
 
+
+impl From<regex::Error> for GenericError
+{
+    fn from(err: regex::Error) -> Self {
+        GenericError {
+            message: err.to_string()
+        }
+    }
+}
+
+
+
 impl From<std::io::Error> for GenericError
 {
     fn from(err: std::io::Error) -> Self {
