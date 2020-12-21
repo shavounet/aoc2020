@@ -1,7 +1,9 @@
 use crate::utils::GenericError;
 use std::rc::Rc;
+use daily_challenge::DailyChallenge;
 
 mod utils;
+mod daily_challenge;
 
 mod day1;
 mod day2;
@@ -14,16 +16,7 @@ fn main() -> Result<(), GenericError> {
     println!("=================");
 
 
-    println!("\n# Day 1");
-    let day1_data = utils::load_data("src/day1/data.txt", "\n")?;
-    match day1::find_complements2(&day1_data, 2020) {
-        Some((val1, val2)) => println!(" - Found {} and {}, their product is {}", val1, val2, val1 * val2),
-        None => println!(" - Could not find 2 values that match 2020...")
-    }
-    match day1::find_complements3(&day1_data, 2020) {
-        Some((val1, val2, val3)) => println!(" - Found {}, {} and {}, their product is {}", val1, val2, val3, val1 * val2 * val3),
-        None => println!(" - Could not find 3 values that match 2020...")
-    }
+    println!("{}", day1::Day1::default().solve("src/day1/data.txt")?);
 
     println!("\n# Day 2");
     let day2_data: Vec<day2::PasswordRequirement> = utils::load_data("src/day2/data.txt", "\n")?;
