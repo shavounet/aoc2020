@@ -1,5 +1,6 @@
 use std::str::FromStr;
 use crate::utils::GenericError;
+use crate::daily_challenge::DailyChallenge;
 
 #[derive(Debug)]
 pub struct Map {
@@ -117,8 +118,37 @@ impl FromStr for Item {
     }
 }
 
-impl Into<Map> for Vec<RowSpec> {
-    fn into(self) -> Map {
-        Map { rows: self }
+impl From<Vec<RowSpec>> for Map {
+    fn from(rows: Vec<RowSpec>) -> Self {
+        Map { rows }
+    }
+}
+
+#[derive(Default)]
+pub struct Day3 {}
+
+impl DailyChallenge for Day3 {
+    type Data = RowSpec;
+    type Wrapper = Map;
+
+    fn get_day_num(&self) -> usize { 3 }
+
+    fn solve_part_1(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let day3_path = Path::new(3, 1, data.len() - 1);
+        let mut day3_count = 0;
+        for point in day3_path {
+            if data.has_tree(point.0, point.1) {
+                day3_count += 1;
+            }
+        }
+        Ok(format!("there is {} trees  in the path", day3_count))
+    }
+
+    fn solve_part_2(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let day3_count2 = vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)].into_iter()
+            .map(|(dx, dy)| Path::new(dx, dy, data.len() - 1))
+            .map(|path| path.filter(|&(x, y)| data.has_tree(x, y)).collect::<Vec<(usize, usize)>>().len())
+            .fold(1, |acc, cur| acc * cur);
+        Ok(format!("final count is {}", day3_count2))
     }
 }

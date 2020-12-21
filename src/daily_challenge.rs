@@ -22,11 +22,14 @@ pub trait DailyChallenge {
     {
         let mut result = String::new();
         result.push_str(format!("# Day {}", self.get_day_num()).as_str());
+        result.push_str("\n");
 
         let data = self.load_data(file_path)?;
 
         result.push_str(format!(" - Part 1 : {}", self.solve_part_1(&data)?).as_str());
+        result.push_str("\n");
         result.push_str(format!(" - Part 2 : {}", self.solve_part_2(&data)?).as_str());
+        result.push_str("\n");
 
         return Ok(result);
     }

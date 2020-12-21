@@ -18,22 +18,7 @@ fn main() -> Result<(), GenericError> {
 
     println!("{}", day1::Day1::default().solve("src/day1/data.txt")?);
     println!("{}", day2::Day2::default().solve("src/day2/data.txt")?);
-
-    println!("\n# Day 3");
-    let day3_data: day3::Map = utils::load_data("src/day3/data.txt", "\n")?.into();
-    let day3_path = day3::Path::new(3, 1, day3_data.len() - 1);
-    let mut day3_count = 0;
-    for point in day3_path {
-        if day3_data.has_tree(point.0, point.1) {
-            day3_count += 1;
-        }
-    }
-    println!(" - There is {} trees", day3_count);
-    let day3_count2 = vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)].into_iter()
-        .map(|(dx, dy)| day3::Path::new(dx, dy, day3_data.len() - 1))
-        .map(|path| path.filter(|&(x, y)| day3_data.has_tree(x, y)).collect::<Vec<(usize, usize)>>().len())
-        .fold(1, |acc, cur| acc * cur);
-    println!(" - Final count is {}", day3_count2);
+    println!("{}", day3::Day3::default().solve("src/day3/data.txt")?);
 
     println!("\n# Day 4");
     let day4_regex_config = Rc::new(day4::RegexConfigs::default());
