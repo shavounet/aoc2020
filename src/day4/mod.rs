@@ -3,6 +3,7 @@ use std::str::FromStr;
 use crate::utils::GenericError;
 use regex::Regex;
 use std::rc::Rc;
+use crate::daily_challenge::DailyChallenge;
 
 #[derive(Debug)]
 pub struct PassportBuilder {
@@ -158,5 +159,54 @@ impl Default for RegexConfigs {
             ecl_regex: Regex::new(r"^(amb|blu|brn|gry|grn|hzl|oth)$").unwrap(),
             pid_regex: Regex::new(r"^\d{9}$").unwrap(),
         }
+    }
+}
+
+pub struct ValidatedPasswordList {
+    pub passwords: Vec<PassportBuilder>
+}
+
+impl From<Vec<PassportBuilder>> for ValidatedPasswordList {
+    fn from(passwords: Vec<PassportBuilder>) -> Self {
+        let day4_regex_config = Rc::new(RegexConfigs::default());
+        let passwords_with_regex: Vec<PassportBuilder> = passwords.into_iter()
+            .map(|pass_builder: PassportBuilder| pass_builder.set_regex_config(day4_regex_config.clone()))
+            .collect::<Vec<PassportBuilder>>();
+
+        ValidatedPasswordList {
+            passwords: passwords_with_regex
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct Day4 {}
+
+impl DailyChallenge for Day4 {
+    type Data = PassportBuilder;
+    type Wrapper = ValidatedPasswordList;
+
+    fn get_day_num(&self) -> usize { 4 }
+
+    fn solve_part_1(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let count = (&data.passwords).into_iter()
+            .filter(|pass_builder| pass_builder.is_valid())
+            .collect::<Vec<&PassportBuilder>>()
+            .len();
+
+        Ok(format!("{} valid passports", count))
+    }
+
+    fn solve_part_2(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let day4_fields_valid_count = (&data.passwords).into_iter()
+            .filter_map(|pass_builder|
+                match pass_builder.is_fields_valid() {
+                    Ok(true) => Some(pass_builder),
+                    _ => None,
+                }
+            )
+            .collect::<Vec<&PassportBuilder>>()
+            .len();
+        Ok(format!("{} fully valid passports", day4_fields_valid_count))
     }
 }
