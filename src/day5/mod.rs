@@ -1,6 +1,7 @@
 use std::str::FromStr;
 use crate::utils::GenericError;
 use std::cmp::Ordering;
+use crate::daily_challenge::DailyChallenge;
 
 #[derive(Debug, Eq)]
 pub struct BoardingPass {
@@ -50,6 +51,7 @@ impl PartialEq for BoardingPass {
         self.spec == other.spec
     }
 }
+
 impl PartialOrd for BoardingPass {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(Self::cmp(self, other))
@@ -59,6 +61,49 @@ impl PartialOrd for BoardingPass {
 impl Ord for BoardingPass {
     fn cmp(&self, other: &Self) -> Ordering {
         self.get_seat_id().cmp(&other.get_seat_id())
+    }
+}
+
+pub struct SortedBoardingPassList {
+    pub boarding_pass: Vec<BoardingPass>
+}
+
+impl From<Vec<BoardingPass>> for SortedBoardingPassList {
+    fn from(mut list: Vec<BoardingPass>) -> Self {
+        list.sort();
+
+        SortedBoardingPassList {
+            boarding_pass: list
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct Day5 {}
+
+impl DailyChallenge for Day5 {
+    type Data = BoardingPass;
+    type Wrapper = SortedBoardingPassList;
+
+    fn get_day_num(&self) -> usize { 5 }
+
+    fn solve_part_1(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let day5_max = data.boarding_pass.last().unwrap();
+        Ok(format!("max seat is {}", day5_max.get_seat_id()))
+    }
+
+    fn solve_part_2(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let mut day5_last_value = data.boarding_pass.first().unwrap().get_seat_id();
+        let day5_my_seat = (&data.boarding_pass).into_iter()
+            .find(|boarding_pass| {
+                return if boarding_pass.get_seat_id() - day5_last_value > 1 {
+                    true
+                } else {
+                    day5_last_value = boarding_pass.get_seat_id();
+                    false
+                };
+            }).unwrap();
+        Ok(format!("my seat is {}", day5_my_seat.get_seat_id() - 1))
     }
 }
 
