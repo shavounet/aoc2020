@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::str::FromStr;
-use crate::utils::GenericError;
+use crate::utils::{GenericError, load_data};
 use regex::Regex;
 use std::rc::Rc;
 use crate::daily_challenge::DailyChallenge;
@@ -187,6 +187,13 @@ impl DailyChallenge for Day4 {
     type Wrapper = ValidatedPasswordList;
 
     fn get_day_num(&self) -> usize { 4 }
+
+    fn load_data(&self, file_path: &str) -> Result<Self::Wrapper, GenericError>
+        where <Self::Data as std::str::FromStr>::Err: std::error::Error
+    {
+        let data: Vec<Self::Data> = load_data(file_path, "\n\n")?;
+        Ok(data.into())
+    }
 
     fn solve_part_1(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
         let count = (&data.passwords).into_iter()
