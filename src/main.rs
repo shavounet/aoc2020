@@ -22,6 +22,7 @@ fn main() -> Result<(), GenericError> {
     println!("{}", day4::Day4::default().solve("src/day4/data.txt")?);
     println!("{}", day5::Day5::default().solve("src/day5/data.txt")?);
     println!("{}", day6::Day6::default().solve("src/day6/data.txt")?);
+    println!("{}", day7::Day7::default().solve("src/day7/data.txt")?);
 
     Ok(())
 }

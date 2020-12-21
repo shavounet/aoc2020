@@ -2,11 +2,12 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use crate::utils::GenericError;
 use regex::{Regex, Captures};
+use crate::daily_challenge::DailyChallenge;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct BagSpec {
     pub color: String,
-    pub can_contain: HashMap<String, usize>,
+    pub sub_bags: HashMap<String, usize>,
 }
 
 
@@ -50,15 +51,108 @@ impl FromStr for BagSpec {
 
         Ok(BagSpec {
             color: color_match,
-            can_contain,
+            sub_bags: can_contain,
         })
     }
 }
 
+impl BagSpec {
+    pub fn contains_color_recursive(&self, color: &String, list: &BagList, cache: &mut HashMap<String, bool>) -> bool {
+        if &self.color == color {
+            return false;
+        } else if self.sub_bags.contains_key(color.as_str()) {
+            return true;
+        } else if self.sub_bags.len() == 0 {
+            return false;
+        } else if cache.contains_key(color.as_str()) {
+            return cache.get(color.as_str()).unwrap().clone();
+        }
+
+        for (color_dep, _) in (&self.sub_bags).into_iter() {
+            let has_color = match list.bags.get(color_dep.as_str()) {
+                Some(bag) => bag.contains_color_recursive(color, list, cache),
+                None => false
+            };
+
+            if has_color {
+                cache.insert(self.color.clone(), has_color);
+                return true;
+            }
+        }
+
+        cache.insert(self.color.clone(), false);
+        return false;
+    }
+
+    pub fn sum_contains_recursive(&self, list: &BagList, cache: &mut HashMap<String, usize>) -> usize {
+        if self.sub_bags.len() == 0 {
+            return 0;
+        } else if cache.contains_key(self.color.as_str()) {
+            return cache.get(self.color.as_str()).unwrap().clone();
+        }
+
+        let mut sum = 0;
+        for (sub_bag_color, count) in (&self.sub_bags).into_iter() {
+            let bag = list.bags.get(sub_bag_color.as_str()).unwrap();
+            let sub_sum = bag.sum_contains_recursive(list, cache);
+
+            sum += count + count * sub_sum;
+        }
+
+        cache.insert(self.color.clone(), sum);
+
+        sum
+    }
+}
+
+pub struct BagList {
+    pub bags: HashMap<String, BagSpec>
+}
+
+impl From<Vec<BagSpec>> for BagList
+{
+    fn from(input: Vec<BagSpec>) -> Self {
+        let mut bags = HashMap::default();
+        for item in input {
+            bags.insert(item.color.clone(), item.clone());
+        }
+
+        BagList {
+            bags
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct Day7 {}
+
+impl DailyChallenge for Day7 {
+    type Data = BagSpec;
+    type Wrapper = BagList;
+
+    fn get_day_num(&self) -> usize { 7 }
+
+    fn solve_part_1(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let mut cache = HashMap::default();
+        let matches: Vec<_> = (&data.bags).into_iter()
+            .filter(|(_, bag)| bag.contains_color_recursive(&"shiny gold".to_string(), data, &mut cache))
+            .collect();
+
+        Ok(format!("final count is {}", matches.len()))
+    }
+
+    fn solve_part_2(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+        let mut cache = HashMap::default();
+        let shiny_gold_bag = data.bags.get("shiny gold").unwrap();
+
+        Ok(format!("final count is {}", shiny_gold_bag.sum_contains_recursive(data, &mut cache)))
+    }
+}
 
 mod tests {
-    use crate::day7::BagSpec;
+    use crate::day7::{BagSpec, BagList};
     use std::str::FromStr;
+    use std::collections::HashMap;
 
     #[test]
     fn it_read_specs() {
@@ -80,12 +174,26 @@ mod tests {
 
         assert!(bag_specs.is_ok());
 
-        let first_bag = &bag_specs.unwrap()[0];
+        let bag_list: BagList = bag_specs.unwrap().into();
+
+        let first_bag_option = bag_list.bags.get("light red");
+        assert!(first_bag_option.is_some());
+        let first_bag = first_bag_option.unwrap();
+
         assert_eq!(first_bag.color, "light red");
-        assert_eq!(first_bag.can_contain.len(), 2);
-        assert!(first_bag.can_contain.contains_key("bright white"));
-        assert_eq!(first_bag.can_contain.get("bright white"), Some(&1));
-        assert!(first_bag.can_contain.contains_key("muted yellow"));
-        assert_eq!(first_bag.can_contain.get("muted yellow"), Some(&2));
+        assert_eq!(first_bag.sub_bags.len(), 2);
+        assert!(first_bag.sub_bags.contains_key("bright white"));
+        assert_eq!(first_bag.sub_bags.get("bright white"), Some(&1));
+        assert!(first_bag.sub_bags.contains_key("muted yellow"));
+        assert_eq!(first_bag.sub_bags.get("muted yellow"), Some(&2));
+
+        let mut cache = HashMap::default();
+        assert!(first_bag.contains_color_recursive(&"shiny gold".to_string(), &bag_list, &mut cache));
+
+        let shiny_gold_bag_option = bag_list.bags.get("shiny gold");
+        assert!(shiny_gold_bag_option.is_some());
+        let shiny_gold_bag = shiny_gold_bag_option.unwrap();
+        let mut cache2 = HashMap::default();
+        assert_eq!(shiny_gold_bag.sum_contains_recursive(&bag_list, &mut cache2), 32);
     }
 }
