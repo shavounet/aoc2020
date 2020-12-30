@@ -11,6 +11,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 fn main() -> Result<(), GenericError> {
     println!("Hello, AOC 2020 !");
@@ -23,6 +24,7 @@ fn main() -> Result<(), GenericError> {
     println!("{}", day5::Day5::default().solve("src/day5/data.txt")?);
     println!("{}", day6::Day6::default().solve("src/day6/data.txt")?);
     println!("{}", day7::Day7::default().solve("src/day7/data.txt")?);
+    println!("{}", day8::Day8::default().solve("src/day8/data.txt")?);
 
     Ok(())
 }

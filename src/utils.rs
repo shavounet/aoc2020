@@ -6,7 +6,7 @@ use std::error::Error;
 use std::num::ParseIntError;
 
 
-pub fn load_data<T: FromStr>(file_name: &str, split_pattern : &str) -> Result<Vec<T>, LoadError>
+pub fn load_data<T: FromStr>(file_name: &str, split_pattern: &str) -> Result<Vec<T>, LoadError>
     where T::Err: Error
 {
     let mut file = File::open(file_name)?;
@@ -29,6 +29,9 @@ pub struct GenericError {
 impl GenericError {
     pub fn new(message: String) -> Self {
         GenericError { message }
+    }
+    pub fn throw<O>(message: &str) -> Result<O, Self> {
+        Err(GenericError { message: message.to_string() })
     }
 }
 
@@ -59,7 +62,6 @@ impl From<regex::Error> for GenericError
         }
     }
 }
-
 
 
 impl From<std::io::Error> for GenericError
