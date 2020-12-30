@@ -2,14 +2,20 @@ use std::str::FromStr;
 use crate::utils::GenericError;
 use crate::daily_challenge::DailyChallenge;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum RunCode {
     Nop,
     Acc,
     Jmp,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
+pub enum ExitCode {
+    EndOfProgram,
+    Error(GenericError),
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Instruction {
     pub name: RunCode,
     pub param: isize,
@@ -23,10 +29,24 @@ pub struct Program {
     pub line_execution_count: Vec<usize>,
 }
 
+impl Instruction {
+    pub fn mutate(self) -> Self {
+        match self.name {
+            RunCode::Acc => self,
+            RunCode::Jmp => Self { name: RunCode::Nop, param: self.param },
+            RunCode::Nop => Self { name: RunCode::Jmp, param: self.param },
+        }
+    }
+
+    pub fn can_mutate(&self) -> bool {
+        self.name == RunCode::Nop || self.name == RunCode::Jmp
+    }
+}
+
 impl Program {
-    pub fn execute_once(&mut self) -> Result<(), GenericError> {
+    pub fn execute_once(&mut self) -> Result<(), ExitCode> {
         if self.current_line >= self.instructions.len() {
-            return GenericError::throw("Out of range");
+            return Err(ExitCode::EndOfProgram);
         }
 
         self.line_execution_count[self.current_line] += 1;
@@ -50,7 +70,7 @@ impl Program {
         Ok(())
     }
 
-    pub fn execute_until_loop(&mut self, max_loop_count: usize) -> Result<(), GenericError> {
+    pub fn execute_until_loop(&mut self, max_loop_count: usize) -> Result<(), ExitCode> {
         let mut will_reach_limit = self.will_reach_limit(max_loop_count);
         while !will_reach_limit {
             self.execute_once()?;
@@ -61,6 +81,11 @@ impl Program {
     }
 
     fn will_reach_limit(&self, max_loop_count: usize) -> bool {
+        if self.current_line >= self.instructions.len() {
+            // We don't track ending programs
+            return false;
+        }
+
         self.line_execution_count[self.current_line] >= (max_loop_count - 1)
     }
 }
@@ -113,7 +138,7 @@ impl From<Vec<Instruction>> for Program {
 }
 
 #[derive(Default)]
-pub struct Day8 ();
+pub struct Day8();
 
 impl DailyChallenge for Day8 {
     type Data = Instruction;
@@ -128,7 +153,18 @@ impl DailyChallenge for Day8 {
     }
 
     fn solve_part_2(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
-        Ok(String::from("unimplemented"))
+        for (i, instruction) in data.instructions.iter().enumerate().rev() {
+            if instruction.can_mutate() {
+                let mut program = data.clone();
+                program.instructions[i] = instruction.clone().mutate();
+                let result = program.execute_until_loop(2);
+                if let Err(ExitCode::EndOfProgram) = result {
+                    return Ok(format!("The mutation was on index {}, the program ends with value {}", i, program.accumulator));
+                }
+            }
+        }
+
+        GenericError::throw("Could not find a valid mutation")
     }
 }
 

@@ -4,6 +4,7 @@ use std::str::FromStr;
 use std::fmt::{Debug, Display, Formatter};
 use std::error::Error;
 use std::num::ParseIntError;
+use crate::day8::ExitCode;
 
 
 pub fn load_data<T: FromStr>(file_name: &str, split_pattern: &str) -> Result<Vec<T>, LoadError>
@@ -63,6 +64,15 @@ impl From<regex::Error> for GenericError
     }
 }
 
+impl From<ExitCode> for GenericError
+{
+    fn from(err: ExitCode) -> Self {
+        match err {
+            ExitCode::EndOfProgram => GenericError::new("End of program".to_string()),
+            ExitCode::Error(generic_error) => generic_error
+        }
+    }
+}
 
 impl From<std::io::Error> for GenericError
 {
