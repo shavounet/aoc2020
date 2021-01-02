@@ -30,6 +30,31 @@ impl DailyChallenge for Day10 {
     }
 
     fn solve_part_2(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
-        Ok(format!("ok"))
+        let mut sorted_data = data.clone();
+        sorted_data.sort();
+        sorted_data.insert(0, 0);
+        sorted_data.push(sorted_data.last().unwrap() + 3);
+
+        let mut groups = vec![];
+        let mut current_start = 0;
+        for i in 1..sorted_data.len() {
+            if sorted_data[i] - sorted_data[i - 1] >= 3 {
+                groups.push(&sorted_data[current_start..i]);
+                current_start = i;
+            }
+        }
+
+        let result = groups.into_iter().map(|values| {
+            // A hard coded result list because why not, 0 allows us to detect failure
+            match values.len() {
+                1 => 1,
+                2 => 1,
+                3 => 2,
+                4 => 4,
+                5 => 7, // 2^3 - 1
+                _ => 0
+            }
+        }).fold(1, |acc: usize, cur| acc * cur);
+        Ok(format!("result is {}", result))
     }
 }
