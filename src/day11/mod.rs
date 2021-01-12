@@ -144,11 +144,12 @@ impl DailyChallenge for Day11 {
         Ok(format!("occupied seat count is {}", new_data.1.count_occupied()))
     }
 
-    fn solve_part_2(&self, data: &Self::Wrapper) -> Result<String, GenericError> {
+    fn solve_part_2(&self, _data: &Self::Wrapper) -> Result<String, GenericError> {
         Ok(format!("ok"))
     }
 }
 
+#[cfg(test)]
 mod tests {
     use crate::day11::{Grid, Row};
     use std::str::FromStr;

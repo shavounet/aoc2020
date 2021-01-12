@@ -107,6 +107,7 @@ impl DailyChallenge for Day5 {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use crate::day5::BoardingPass;
     use std::str::FromStr;

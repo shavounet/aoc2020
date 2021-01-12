@@ -149,6 +149,7 @@ impl DailyChallenge for Day7 {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use crate::day7::{BagSpec, BagList};
     use std::str::FromStr;

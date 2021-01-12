@@ -168,6 +168,7 @@ impl DailyChallenge for Day8 {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use crate::day8::{Instruction, RunCode, Program};
     use std::str::FromStr;
